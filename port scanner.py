@@ -4,12 +4,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
 
+MAX_WORKERS = 100
+TIMEOUT = 1
+
 def main():
     ip = get_ip()
     start_port, end_port = get_port_range()
     results = []
     start = time.perf_counter()
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {
             executor.submit(scan_port, ip, port) : port
             for port in range(start_port, end_port + 1)
@@ -49,7 +52,7 @@ def get_port_range():
 
 def scan_port(ip, port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(1)
+        sock.settimeout(TIMEOUT)
         result = sock.connect_ex((ip, port))
         if result == 0:
             return True 
@@ -57,15 +60,14 @@ def scan_port(ip, port):
    
 
 
-def print_results(results, time):
-    global start, end
+def print_results(results, elapsed_time):
     print("========\nOpen ports\n\n")
     for result in results:
         try:
-            print(result + "   " + socket.getservbyport(result))
-        except:
+            print(f"{result}   {socket.getservbyport(result)}")
+        except OSError:
             print(result) 
-    print(f"Total: {len(results)}\nScan completed in {time:.2f} seconds.\n\n========")
+    print(f"Total: {len(results)}\nScan completed in {elapsed_time:.2f} seconds.\nThreads: {MAX_WORKERS}\n\n========")
     
 
 main()

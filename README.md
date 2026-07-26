@@ -4,7 +4,7 @@ A simple command-line port scanner written in python.
 
 ## Features
 
-Scans port in definited range.
+Scans port in definited range, using multithread technology
 
 ## Technologies
 
@@ -12,6 +12,7 @@ Scans port in definited range.
 - socket
 - ipaddress
 - time
+- concurent.future
 
 ## Installation
 

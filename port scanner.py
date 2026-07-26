@@ -1,19 +1,27 @@
 import socket
 import ipaddress
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
 
 def main():
     ip = get_ip()
-    port_range = get_port_range()
+    start_port, end_port = get_port_range()
     results = []
     start = time.perf_counter()
-    for port in (range(port_range[0], port_range[1] + 1)):
-        if scan_port(ip, port):
-            results.append(port)
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        futures = {
+            executor.submit(scan_port, ip, port) : port
+            for port in range(start_port, end_port + 1)
+        }
+
+        for future in as_completed(futures):
+            port = futures[future]
+            if future.result():
+                results.append(port)
     end = time.perf_counter()
 
-    print_results(results, end - start)
+    print_results(sorted(results), end - start)
     
         
 def get_ip():

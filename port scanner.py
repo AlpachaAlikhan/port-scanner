@@ -5,7 +5,7 @@ def main():
     ip = get_ip()
     port_range = get_port_range()
     results = []
-    for port in range(port_range):
+    for port in (range(port_range[0], port_range[1] + 1)):
         if scan_port(ip, port):
             results.append(port)
     print_results(results)
@@ -35,19 +35,20 @@ def get_port_range():
             print("Invalid port range. Please enter a valid range (e.g., 20-80).")
 
 def scan_port(ip, port):
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(1)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1)
+        result = sock.connect_ex((ip, port))
+        if result == 0:
             return True 
-    except socket.error:
         return False
+   
 
 
 def print_results(results):
     print("========\nOpen ports\n\n")
     for result in results:
-        print(results) 
+        print(result) 
     print(f"Total: {len(results)}\n========")
     
 
-scan_port("1.1.1.1", 44)
+main()

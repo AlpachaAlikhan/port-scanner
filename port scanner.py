@@ -1,14 +1,19 @@
 import socket
 import ipaddress
+import time
+
 
 def main():
     ip = get_ip()
     port_range = get_port_range()
     results = []
+    start = time.perf_counter()
     for port in (range(port_range[0], port_range[1] + 1)):
         if scan_port(ip, port):
             results.append(port)
-    print_results(results)
+    end = time.perf_counter()
+
+    print_results(results, end - start)
     
         
 def get_ip():
@@ -44,11 +49,15 @@ def scan_port(ip, port):
    
 
 
-def print_results(results):
+def print_results(results, time):
+    global start, end
     print("========\nOpen ports\n\n")
     for result in results:
-        print(result) 
-    print(f"Total: {len(results)}\n========")
+        try:
+            print(result + "   " + socket.getservbyport(result))
+        except:
+            print(result) 
+    print(f"Total: {len(results)}\nScan completed in {time:.2f} seconds.\n\n========")
     
 
 main()
